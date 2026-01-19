@@ -4,9 +4,10 @@ from odoo import fields, models
 class StockQuant(models.Model):
     _inherit = "stock.quant"
 
-    # Compatibility shim: some environments include views referencing stock.quant.reason_note.
-    # Keeping this field here prevents upgrade failures until those views are cleaned up.
+    # Compatibility shim: some environments include views referencing stock.quant.reason_note/reason_id.
+    # Keeping these fields here prevents upgrade failures until those views are cleaned up.
     reason_note = fields.Text(string="Reason Note")
+    reason_id = fields.Many2one("stock.inventory.reason", string="Reason")
 
     def action_open_print_wizard(self):
         action = self.env.ref("natura_print.action_natura_print_quant_label_wizard").read()[0]
