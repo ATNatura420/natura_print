@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="stock_lot_tree_view_inherit_natura_print" model="ir.ui.view">
+        <field name="name">stock.lot.tree.view.inherit.natura_print</field>
+        <field name="model">stock.lot</field>
+        <field name="inherit_id" ref="stock.view_production_lot_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree" position="inside">
+                <header>
+                    <button name="action_open_print_wizard" type="object" string="Print Labels" class="btn-primary"/>
+                </header>
+            </xpath>
+        </field>
+    </record>
+</odoo>
