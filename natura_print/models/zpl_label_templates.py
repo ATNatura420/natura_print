@@ -14,7 +14,7 @@ class LabelTemplate(models.Model):
         string="Default Model",
         required=True,
         default=lambda self: self.env.ref("product.model_product_template"),
-        domain="[('model', '=', 'product.template')]",
+        domain="[('model', 'in', ('product.template', 'stock.lot', 'stock.quant'))]",
         ondelete="cascade",
     )
     dpi = fields.Selection(
