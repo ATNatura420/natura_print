@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+<odoo>
+<record id="printers_list_action" model="ir.actions.act_window">
+    <field name="name">Printers</field>
+    <field name="res_model">printers.list</field>
+    <field name="view_mode">tree,form</field>
+</record>
+
+<record id="printers_list_action_form" model="ir.ui.view">
+    <field name="name">printers.list.action.form</field>
+    <field name="model">printers.list</field>
+    <field name="arch" type="xml">
+        <form string="Printers List Form">
+            <sheet>
+            <div class="oe_title">
+            <h1><field name="name"/></h1>
+        </div>
+                <group>
+                    <group>
+                        <field name="ip_address"/>
+                        <field name="dpi"/>
+                        </group>
+                     <group>
+                        <field name="location"/>
+                        <field name="active"/>
+                     </group>
+                </group>
+            <notebook>
+            <page string="Note">
+            <group>
+                <field name="note"/>
+                </group>
+            </page>
+        </notebook>    
+            </sheet>
+        </form>
+    </field>
+</record>
+
+<record id="printers_list_action_view_tree" model="ir.ui.view">
+    <field name="name">printers.list.menu.action</field>
+    <field name="model">printers.list</field>
+    <field name="arch" type="xml">
+        <tree string="Printers List">
+            <field name="name" string="Title"/>
+            <field name="ip_address"/>
+            <field name="dpi"/>
+            <field name="location"/>
+            <field name="active"/>
+        </tree>
+    </field>
+</record>
+
+<record id="printers_list_action_view_search" model="ir.ui.view">
+    <field name="name">printers.list.menu.action.search</field>
+    <field name="model">printers.list</field>
+    <field name="arch" type="xml">
+        <search string="Search Printers">
+            <field name="name" string="Title"/>
+            <field name="ip_address"/>
+            <field name="dpi"/>
+            <field name="location"/>
+            <field name="active"/>
+            <filter string="DPI" name="dpi_group" context="{'group_by': 'dpi'}"/>
+            <separator/>
+            <filter string="Active" name="active" domain="[('active', '=', True)]"/>
+            <filter string="Inactive" name="inactive" domain="[('active', '=', False)]"/>
+        </search>
+    </field>
+</record>
+</odoo>

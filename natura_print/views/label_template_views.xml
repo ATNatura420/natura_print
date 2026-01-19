@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+<odoo>
+<record id="label_template_action" model="ir.actions.act_window">
+    <field name="name">ZPL Label Templates</field>
+    <field name="res_model">zpl.label.template</field>
+    <field name="view_mode">tree,form</field>
+</record>
+
+<record id="label_template_action_form" model="ir.ui.view">
+    <field name="name">zpl.label.template.action.form</field>
+    <field name="model">zpl.label.template</field>
+    <field name="arch" type="xml">
+        <form string="ZPL Label Templates">
+            <sheet>
+            <div class="oe_title">
+            <h1><field name="name"/></h1>
+        </div>
+                <header>
+                    <button name="action_open_test_print" type="object" string="Test Print" class="btn-primary"/>
+                </header>
+                <field name="model_id" invisible="1"/>
+                <group>
+                    <group>
+                        <field name="model_id" options="{'no_create': True}"/>
+                        <field name="width"/>
+                        <field name="dpi"/>
+                    </group>
+                    <group>
+                        <field name="height"/>
+                        <field name="active"/>
+                    </group>
+                </group>
+                <separator string="ZPL Code"/>
+                <group colspan="2">
+                    <field name="zpl_code" widget="text" colspan="2" nolabel="1"/>
+                </group>
+                <notebook>
+                    <page string="Placeholders">
+                        <field name="placeholder_ids">
+                            <tree editable="bottom">
+                                <field name="placeholder"/>
+                                <field name="model_id" invisible="1"/>
+                                <field name="field_id" domain="[('model_id', '=', model_id), ('ttype', 'not in', ('one2many', 'many2many'))]"/>
+                            </tree>
+                        </field>
+                    </page>
+                </notebook>
+            </sheet>
+        </form>
+    </field>
+</record>
+
+<record id="zpl_label_template_action_tree" model="ir.ui.view">
+    <field name="name">zpl.label.template.action.tree</field>
+    <field name="model">zpl.label.template</field>
+    <field name="arch" type="xml">
+        <tree string="ZPL Label Templates">
+            <field name="name" string="Title"/>
+            <field name="width"/>
+            <field name="dpi"/>
+            <field name="height"/>
+            <field name="active"/>
+        </tree>
+    </field>
+</record>
+
+<record id="zpl_label_template_action_view_search" model="ir.ui.view">
+    <field name="name">zpl.label.template.menu.action.search</field>
+    <field name="model">zpl.label.template</field>
+    <field name="arch" type="xml">
+        <search string="Search ZPL Label Templates">
+            <field name="name" string="Title"/>
+            <field name="width"/>
+            <field name="dpi"/>
+            <field name="height"/>
+            <field name="active"/>
+            <filter string="DPI" name="dpi_group" context="{'group_by': 'dpi'}"/>
+            <separator/>
+            <filter string="Active" name="active" domain="[('active', '=', True)]"/>
+            <filter string="Inactive" name="inactive" domain="[('active', '=', False)]"/>
+        </search>
+    </field>
+</record>
+</odoo>

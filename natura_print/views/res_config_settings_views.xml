@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_inherit_natura_print" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.natura_print</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app data-string="Natura Print" string="Natura Print" name="natura_print" groups="base.group_system">
+                    <block title="Configuration">
+                        <setting string="Hostname">
+                            <field name="natura_print_hostname"/>
+                        </setting>
+                        <setting string="API User">
+                            <field name="natura_print_api_user"/>
+                        </setting>
+                        <setting string="API Password">
+                            <field name="natura_print_api_password" password="True"/>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_natura_print_configuration" model="ir.actions.act_window">
+        <field name="name">Configuration</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="target">inline</field>
+        <field name="context">{'module': 'natura_print', 'bin_size': False}</field>
+        <field name="groups_id" eval="[(4, ref('base.group_system'))]"/>
+    </record>
+</odoo>

@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+natura_print.access_printers_list,access_printers_list,natura_print.model_printers_list,base.group_user,1,1,1,1
+natura_print.access_label_template,access_label_template,natura_print.model_zpl_label_template,base.group_user,1,1,1,1
+natura_print.access_test_print_wizard,access_test_print_wizard,natura_print.model_natura_print_test_wizard,base.group_user,1,1,1,1
+natura_print.access_placeholder,access_placeholder,natura_print.model_natura_print_placeholder,base.group_user,1,1,1,1
+natura_print.access_product_label_wizard,access_product_label_wizard,natura_print.model_natura_print_product_label_wizard,base.group_user,1,1,1,1
+natura_print.access_product_label_line,access_product_label_line,natura_print.model_natura_print_product_label_line,base.group_user,1,1,1,1

@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<odoo>
+<menuitem id="natura_print_menu_root" name="Natura Print" action="label_template_action">
+    <menuitem id="zpl_label_templates_menu" name="Label Templates" sequence="1">
+        <menuitem id="label_template_menu_action" action="label_template_action"/>
+    </menuitem>
+    <menuitem id="printers_menu_list" name="Settings" sequence="2">
+        <menuitem id="printers_list_menu_action" action="printers_list_action" sequence="1"/>
+        <menuitem id="natura_print_settings_menu_action" name="Configuration" action="action_natura_print_configuration" sequence="99"/>
+    </menuitem>
+</menuitem>
+</odoo>

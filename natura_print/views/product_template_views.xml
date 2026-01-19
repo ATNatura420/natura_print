@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="product_template_tree_view_inherit_natura_print" model="ir.ui.view">
+        <field name="name">product.template.tree.view.inherit.natura_print</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_tree_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree" position="inside">
+                <header>
+                    <button name="action_open_print_wizard" type="object" string="Print Labels" class="btn-primary"/>
+                </header>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="product_template_form_view_inherit_natura_print" model="ir.ui.view">
+        <field name="name">product.template.form.view.inherit.natura_print</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_open_print_wizard" type="object" string="Print Labels" class="btn-secondary"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
