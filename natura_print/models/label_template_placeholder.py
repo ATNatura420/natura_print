@@ -21,6 +21,9 @@ class NaturaPrintPlaceholder(models.Model):
     placeholder = fields.Char(string="Placeholder", required=True)
     field_path = fields.Char(
         string="Field Path",
+        compute="_compute_field_path",
+        store=True,
+        readonly=True,
         help="Dot-separated field path starting from the default model, e.g. product_id.name",
     )
     related_model = fields.Char(
@@ -35,6 +38,11 @@ class NaturaPrintPlaceholder(models.Model):
     related_field_id = fields.Many2one(
         "ir.model.fields",
         string="Related Field",
+    )
+    path_line_ids = fields.One2many(
+        "natura.print.placeholder.path",
+        "placeholder_id",
+        string="Field Path Lines",
     )
 
     @staticmethod
@@ -55,19 +63,17 @@ class NaturaPrintPlaceholder(models.Model):
                 template = self.env["zpl.label.template"].browse(vals["template_id"])
                 if template.model_id:
                     vals["model_id"] = template.model_id.id
-            self._build_field_path_vals(vals)
         return super().create(vals_list)
 
     def write(self, vals):
         if "placeholder" in vals:
             vals["placeholder"] = self._normalize_placeholder(vals["placeholder"])
-        self._build_field_path_vals(vals, record=self)
         return super().write(vals)
 
     @api.depends("field_id")
     def _compute_related_model(self):
         for record in self:
-            if record.field_id and record.field_id.ttype == "many2one":
+            if record.field_id and record.field_id.ttype in ("many2one", "one2many", "many2many"):
                 record.related_model = record.field_id.relation
             else:
                 record.related_model = False
@@ -75,11 +81,12 @@ class NaturaPrintPlaceholder(models.Model):
     @api.onchange("field_id", "related_field_id")
     def _onchange_field_path(self):
         for record in self:
-            if record.field_id and record.field_id.ttype != "many2one":
+            if record.field_id and record.field_id.ttype not in ("many2one", "one2many", "many2many"):
                 record.related_field_id = False
-            record.field_path = record._build_field_path(
-                record.field_id, record.related_field_id
-            )
+            if not record.path_line_ids:
+                record.field_path = record._build_field_path(
+                    record.field_id, record.related_field_id
+                )
 
     @staticmethod
     def _build_field_path(field_id, related_field_id):
@@ -90,18 +97,17 @@ class NaturaPrintPlaceholder(models.Model):
             path = f"{path}.{related_field_id.name}"
         return path
 
-    def _build_field_path_vals(self, vals, record=None):
-        if vals.get("field_path"):
-            return
-
-        field_id = vals.get("field_id")
-        related_field_id = vals.get("related_field_id")
-        if record and not field_id:
-            field_id = record.field_id.id if record.field_id else False
-        if record and not related_field_id:
-            related_field_id = record.related_field_id.id if record.related_field_id else False
-
-        if field_id:
-            field = self.env["ir.model.fields"].browse(field_id)
-            related_field = self.env["ir.model.fields"].browse(related_field_id) if related_field_id else False
-            vals["field_path"] = self._build_field_path(field, related_field)
+    @api.depends("path_line_ids.field_id", "path_line_ids.sequence", "field_id", "related_field_id")
+    def _compute_field_path(self):
+        for record in self:
+            if record.path_line_ids:
+                parts = [
+                    line.field_id.name
+                    for line in record.path_line_ids.sorted("sequence")
+                    if line.field_id
+                ]
+                record.field_path = ".".join(parts)
+            else:
+                record.field_path = record._build_field_path(
+                    record.field_id, record.related_field_id
+                )

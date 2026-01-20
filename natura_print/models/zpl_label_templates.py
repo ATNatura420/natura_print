@@ -18,7 +18,7 @@ class LabelTemplate(models.Model):
         string="Default Model",
         required=True,
         default=lambda self: self.env.ref("product.model_product_template"),
-        domain="[('model', 'in', ('product.template', 'stock.lot', 'stock.quant'))]",
+        domain="[('model', 'in', ('product.template', 'stock.lot', 'stock.quant', 'mrp.production'))]",
         ondelete="cascade",
     )
     dpi = fields.Selection(
@@ -125,6 +125,7 @@ class LabelTemplate(models.Model):
         self._update_preview_image(silent=False)
         return True
 
+
     @api.model_create_multi
     def create(self, vals_list):
         records = super().create(vals_list)
@@ -141,6 +142,7 @@ class LabelTemplate(models.Model):
             for record in self:
                 record._update_preview_image(silent=True)
         return res
+
 
     def _labelary_dpmm(self):
         mapping = {
