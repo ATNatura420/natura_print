@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="natura_print_placeholder_form_view" model="ir.ui.view">
+        <field name="name">natura.print.placeholder.form</field>
+        <field name="model">natura.print.placeholder</field>
+        <field name="arch" type="xml">
+            <form string="Placeholder">
+                <sheet>
+                    <group>
+                        <field name="placeholder"/>
+                        <field name="field_id"/>
+                        <field name="related_field_id"/>
+                        <field name="field_path" readonly="1"/>
+                    </group>
+                    <group string="Field Path Builder">
+                        <field name="path_line_ids">
+                            <tree editable="bottom">
+                                <field name="allowed_model" invisible="1"/>
+                                <field name="sequence" widget="handle"/>
+                                <field name="field_id"/>
+                                <field name="relation_model" readonly="1"/>
+                            </tree>
+                        </field>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

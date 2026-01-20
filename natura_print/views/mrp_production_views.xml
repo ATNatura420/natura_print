@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="mrp_production_tree_view_inherit_natura_print" model="ir.ui.view">
+        <field name="name">mrp.production.tree.view.inherit.natura_print</field>
+        <field name="model">mrp.production</field>
+        <field name="inherit_id" ref="mrp.mrp_production_tree_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree/header" position="inside">
+                <button name="action_open_print_wizard" type="object" string="Print Labels" class="btn-primary"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="mrp_production_form_view_inherit_natura_print" model="ir.ui.view">
+        <field name="name">mrp.production.form.view.inherit.natura_print</field>
+        <field name="model">mrp.production</field>
+        <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_open_print_wizard" type="object" string="Print Labels" class="btn-secondary"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
