@@ -19,6 +19,11 @@
         'views/test_print_wizard_views.xml',
         'views/natura_print_menus.xml'
         ],
+    'assets': {
+        'web.assets_backend': [
+            'natura_print/static/src/css/natura_print.css',
+        ],
+    },
     'installable': True,
     'application': True,
     'auto_install': False
