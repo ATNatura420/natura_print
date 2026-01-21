@@ -3,6 +3,7 @@ from . import label_template_placeholder
 from . import placeholder_path
 from . import product_template
 from . import res_config_settings
+from . import res_users
 from . import stock_lot
 from . import stock_quant
 from . import mrp_production

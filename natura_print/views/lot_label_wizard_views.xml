@@ -18,8 +18,11 @@
                             </tree>
                         </field>
                     </group>
+                    <field name="show_csv_button" invisible="1"/>
                 </sheet>
                 <footer>
+                    <button name="action_open_csv_wizard" type="object" string="Print from CSV" class="btn-secondary"
+                        invisible="not show_csv_button"/>
                     <button name="action_send_labels" type="object" string="Print" class="btn-primary"/>
                     <button string="Cancel" class="btn-secondary" special="cancel"/>
                 </footer>
