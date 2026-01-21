@@ -16,6 +16,7 @@
         'views/product_label_wizard_views.xml',
         'views/product_template_views.xml',
         'views/quant_label_wizard_views.xml',
+        'views/edited_label_wizard_views.xml',
         'views/res_config_settings_views.xml',
         'views/res_users_views.xml',
         'views/stock_lot_views.xml',
