@@ -17,6 +17,9 @@
         <field name="model">stock.lot</field>
         <field name="inherit_id" ref="stock.view_production_lot_form"/>
         <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <field name="x_studio_batch_result" invisible="1"/>
+            </xpath>
             <xpath expr="//div[@class='oe_title']" position="before">
                 <div class="o_natura_print_action">
                     <button name="action_open_print_wizard" type="object" string="Print Labels" class="btn btn-secondary"/>

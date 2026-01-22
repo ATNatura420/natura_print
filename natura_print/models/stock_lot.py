@@ -1,11 +1,14 @@
 import requests
 
-from odoo import _, models
+from odoo import _, fields, models
 from odoo.exceptions import UserError
 
 
 class StockLot(models.Model):
     _inherit = "stock.lot"
+
+    # Compatibility shim for environments that reference studio fields in views.
+    x_studio_batch_result = fields.Char(string="Batch Result")
 
     def action_open_print_wizard(self):
         action = self.env.ref("natura_print.action_natura_print_lot_label_wizard").read()[0]
