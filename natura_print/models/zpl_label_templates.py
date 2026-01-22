@@ -97,6 +97,40 @@ class LabelTemplate(models.Model):
             zpl = zpl.replace(f"${{{placeholder}}}", value)
         return zpl
 
+    def _render_zpl_from_values(self, values):
+        self.ensure_one()
+        zpl = self.zpl_code or ""
+        for placeholder in self._extract_placeholders(zpl):
+            if placeholder not in values:
+                continue
+            value = values.get(placeholder)
+            value = "" if value is None else str(value)
+            zpl = zpl.replace(f"${{{placeholder}}}", value)
+        return zpl
+
+    def _values_from_record(self, record):
+        self.ensure_one()
+        zpl = self.zpl_code or ""
+        mapping = {}
+        placeholder_map = {}
+        for ph in self.placeholder_ids:
+            key = ph.placeholder
+            if key and key.startswith("${") and key.endswith("}"):
+                key = key[2:-1].strip()
+            placeholder_map[key] = ph
+
+        for placeholder in self._extract_placeholders(zpl):
+            value = ""
+            ph = placeholder_map.get(placeholder)
+            if ph:
+                field_path = (ph.field_path or "").strip()
+                if not field_path and ph.field_id:
+                    field_path = ph.field_id.name
+                if field_path:
+                    value = self._resolve_field_path(record, field_path)
+            mapping[placeholder] = value
+        return mapping
+
     @staticmethod
     def _resolve_field_path(record, field_path):
         value = record

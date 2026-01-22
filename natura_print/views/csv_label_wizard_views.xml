@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_natura_print_csv_label_wizard_form" model="ir.ui.view">
+        <field name="name">natura.print.csv.label.wizard.form</field>
+        <field name="model">natura.print.csv.label.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Print Labels from CSV">
+                <sheet>
+                    <group>
+                        <field name="template_id" required="1"/>
+                        <field name="printer_id" required="1"/>
+                    </group>
+                    <group>
+                        <field name="csv_file" filename="csv_filename" required="1"/>
+                        <field name="delimiter"/>
+                        <field name="start_row"/>
+                        <field name="headers_preview" nolabel="1" readonly="1"/>
+                    </group>
+                    <group string="Column Mapping">
+                        <field name="mapping_line_ids">
+                            <tree editable="bottom">
+                                <field name="placeholder"/>
+                                <field name="column_header"/>
+                                <field name="column_ref"/>
+                            </tree>
+                        </field>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_print_csv" type="object" string="Print" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_natura_print_csv_label_wizard" model="ir.actions.act_window">
+        <field name="name">Print Labels from CSV</field>
+        <field name="res_model">natura.print.csv.label.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

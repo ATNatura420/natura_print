@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_natura_print_edited_label_wizard_form" model="ir.ui.view">
+        <field name="name">natura.print.edited.label.wizard.form</field>
+        <field name="model">natura.print.edited.label.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Print with Edits">
+                <sheet>
+                    <group>
+                        <field name="template_id" required="1"/>
+                        <field name="printer_id" required="1"/>
+                        <field name="qty" required="1"/>
+                        <field name="source_model" invisible="1"/>
+                        <field name="source_res_id" invisible="1"/>
+                    </group>
+                    <group>
+                        <button name="action_update_preview" type="object" string="Update Preview" class="btn-secondary"
+                                context="{'force_save': True}" invisible="1"/>
+                    </group>
+                    <group>
+                        <div class="o_natura_preview" colspan="2">
+                            <field name="preview_image" widget="image" nolabel="1"/>
+                            <div class="o_natura_preview_caption">Preview powered by Labelary&#8482;</div>
+                        </div>
+                    </group>
+                    <group>
+                        <field name="line_ids" force_save="1">
+                            <tree editable="bottom" create="0">
+                                <field name="placeholder" readonly="1" force_save="1"/>
+                                <field name="value" readonly="1" force_save="1"/>
+                                <field name="new_value" force_save="1"/>
+                            </tree>
+                        </field>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_print" type="object" string="Print" class="btn-primary"
+                            context="{'force_save': True}"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_natura_print_edited_label_wizard" model="ir.actions.act_window">
+        <field name="name">Print with Edits</field>
+        <field name="res_model">natura.print.edited.label.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>
