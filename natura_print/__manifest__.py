@@ -4,7 +4,7 @@
     'category': 'Inventory/Label Printing',
     'summary': 'Manage Label Templates and printers and print labels',
     'description': "",
-    'depends': ['base', 'product', 'stock', 'mrp'],
+    'depends': ['base', 'product', 'stock', 'mrp', 'metrc'],
     'data': [
         'security/ir.model.access.csv', 
         'views/printers_list_views.xml', 
