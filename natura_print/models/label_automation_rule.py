@@ -1,4 +1,4 @@
-from odoo import fields, models
+from odoo import api, fields, models
 
 
 class NaturaPrintLabelAutomation(models.Model):
@@ -24,3 +24,20 @@ class NaturaPrintLabelAutomation(models.Model):
         string="Webhook URL",
         required=True,
     )
+    available_model_ids = fields.Many2many(
+        "ir.model",
+        compute="_compute_available_models",
+        store=False,
+    )
+
+    @api.depends()
+    def _compute_available_models(self):
+        allowed_model_names = [
+            "product.template",
+            "stock.lot",
+            "stock.quant",
+            "mrp.production",
+        ]
+        models = self.env["ir.model"].sudo().search([("model", "in", allowed_model_names)])
+        for record in self:
+            record.available_model_ids = models
