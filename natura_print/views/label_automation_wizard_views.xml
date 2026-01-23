@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_natura_print_label_automation_wizard_form" model="ir.ui.view">
+        <field name="name">natura.print.label.automation.wizard.form</field>
+        <field name="model">natura.print.label.automation.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Label Automations">
+                <sheet>
+                    <group>
+                        <field name="automation_id" required="1"
+                               domain="[('active', '=', True), ('model_id.model', '=', source_model)]"/>
+                        <field name="qty"/>
+                    </group>
+                    <field name="source_model" invisible="1"/>
+                    <field name="source_res_id" invisible="1"/>
+                </sheet>
+                <footer>
+                    <button name="action_run" type="object" string="Run" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_natura_print_label_automation_wizard" model="ir.actions.act_window">
+        <field name="name">Label Automations</field>
+        <field name="res_model">natura.print.label.automation.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

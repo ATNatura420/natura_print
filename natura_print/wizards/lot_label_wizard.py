@@ -28,11 +28,16 @@ class NaturaPrintLotLabelWizard(models.TransientModel):
         compute="_compute_show_csv_button",
         string="Show CSV Button",
     )
+    show_automation_button = fields.Boolean(
+        compute="_compute_show_csv_button",
+        string="Show Label Automation Button",
+    )
 
     @api.depends("line_ids")
     def _compute_show_csv_button(self):
         for wizard in self:
             wizard.show_csv_button = len(wizard.line_ids) == 1
+            wizard.show_automation_button = wizard.show_csv_button
 
     @api.model
     def default_get(self, fields_list):
@@ -112,6 +117,20 @@ class NaturaPrintLotLabelWizard(models.TransientModel):
             "default_printer_id": self.printer_id.id,
             "default_source_model": record._name,
             "default_source_res_id": record.id,
+        }
+        return action
+
+    def action_open_label_automation_wizard(self):
+        self.ensure_one()
+        if len(self.line_ids) != 1:
+            raise UserError(_("Select exactly one line to run a label automation."))
+        line = self.line_ids[0]
+        record = line.lot_id
+        action = self.env.ref("natura_print.action_natura_print_label_automation_wizard").read()[0]
+        action["context"] = {
+            "default_source_model": record._name,
+            "default_source_res_id": record.id,
+            "default_qty": line.qty or 1,
         }
         return action
 

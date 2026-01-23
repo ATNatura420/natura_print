@@ -1,5 +1,3 @@
-import requests
-
 from odoo import _, models
 from odoo.exceptions import UserError
 
@@ -15,43 +13,64 @@ class ProductTemplate(models.Model):
         }
         return action
 
-    def natura_print_print_label(self, qty=1):
-        user = self.env.user
-        template = user._natura_print_get_default_template(self._name)
-        printer = user.natura_print_default_printer_id
+    def natura_print_print_label(
+        self,
+        qty=1,
+        template=None,
+        template_id=None,
+        template_xmlid=None,
+        template_name=None,
+        printer=None,
+        printer_id=None,
+        printer_ip=None,
+        printer_name=None,
+        overrides=None,
+    ):
+        """Callable from Server Actions / Automated Actions."""
+        service = self.env["natura.print.service"]
 
+        template = service.resolve_template(
+            self._name,
+            template=template,
+            template_id=template_id,
+            template_xmlid=template_xmlid,
+            template_name=template_name,
+        )
         if not template:
-            raise UserError(_("Missing default label template for %s.") % self._description)
-        if not printer:
-            raise UserError(_("Missing default printer in your preferences."))
+            raise UserError(_("Missing label template for %s.") % self._description)
 
-        params = self.env["ir.config_parameter"].sudo()
-        hostname = params.get_param("natura_print.hostname")
-        api_user = params.get_param("natura_print.api_user")
-        api_password = params.get_param("natura_print.api_password")
-
-        if not hostname or not api_user or not api_password:
+        if template.model_id and template.model_id.model and template.model_id.model != self._name:
             raise UserError(
                 _(
-                    "Missing configuration. Set Hostname, API User, and API Password "
-                    "under Settings > Configuration."
+                    "Template '%(template)s' is for model '%(template_model)s' "
+                    "but you are printing '%(record_model)s'."
+                )
+                % {
+                    "template": template.display_name,
+                    "template_model": template.model_id.model,
+                    "record_model": self._name,
+                }
+            )
+
+        printer_ip_value = service.resolve_printer_ip(
+            printer=printer,
+            printer_id=printer_id,
+            printer_ip=printer_ip,
+            printer_name=printer_name,
+        )
+        if not printer_ip_value:
+            raise UserError(
+                _(
+                    "Missing printer. Set a default printer in your preferences, "
+                    "or pass printer_id / printer_ip / printer_name."
                 )
             )
 
         for record in self:
-            zpl = template._render_zpl(record)
-            payload = {
-                "zpl": zpl,
-                "printer_ip": printer.ip_address,
-                "qty": qty or 1,
-            }
-            try:
-                response = requests.post(
-                    hostname,
-                    json=payload,
-                    auth=(api_user, api_password),
-                    timeout=10,
-                )
-                response.raise_for_status()
-            except requests.RequestException as exc:
-                raise UserError(_("Print failed: %s") % exc) from exc
+            service.print_record(
+                record,
+                template=template,
+                printer_ip=printer_ip_value,
+                qty=qty or 1,
+                overrides=overrides,
+            )

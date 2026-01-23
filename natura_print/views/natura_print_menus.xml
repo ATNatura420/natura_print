@@ -6,6 +6,8 @@
     </menuitem>
     <menuitem id="printers_menu_list" name="Settings" sequence="2">
         <menuitem id="printers_list_menu_action" action="printers_list_action" sequence="1"/>
+        <menuitem id="natura_print_label_automation_menu" name="Label Automation Rules"
+            action="action_natura_print_label_automation" sequence="69"/>
         <menuitem id="natura_print_settings_menu_action" name="Configuration" action="action_natura_print_configuration" sequence="99"/>
     </menuitem>
 </menuitem>
