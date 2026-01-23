@@ -133,7 +133,6 @@ class NaturaPrintProductLabelWizard(models.TransientModel):
         action["context"] = {
             "default_source_model": record._name,
             "default_source_res_id": record.id,
-            "default_qty": line.qty or 1,
         }
         return action
 

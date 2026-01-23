@@ -15,7 +15,6 @@ class NaturaPrintLabelAutomationWizard(models.TransientModel):
     )
     source_model = fields.Char(string="Source Model", required=True)
     source_res_id = fields.Integer(string="Source Record ID", required=True)
-    qty = fields.Integer(string="Quantity", default=1)
 
     def action_run(self):
         self.ensure_one()
@@ -37,8 +36,6 @@ class NaturaPrintLabelAutomationWizard(models.TransientModel):
             "_model": self.automation_id.model_id.model or self.source_model,
             "_id": self.source_res_id,
         }
-        if self.qty:
-            payload["qty"] = self.qty
 
         try:
             response = requests.post(
