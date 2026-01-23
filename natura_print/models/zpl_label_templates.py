@@ -1,10 +1,6 @@
-import base64
 import re
 
-import requests
-
 from odoo import api, fields, models
-from odoo.exceptions import UserError
 
 PLACEHOLDER_RE = re.compile(r"\$\{([^}]+)\}")
 
@@ -18,7 +14,7 @@ class LabelTemplate(models.Model):
         string="Default Model",
         required=True,
         default=lambda self: self.env.ref("product.model_product_template"),
-        domain="[('model', 'in', ('product.template', 'stock.lot', 'stock.quant', 'mrp.production'))]",
+        domain="[('model', 'in', ('product.template', 'stock.lot', 'stock.quant'))]",
         ondelete="cascade",
     )
     dpi = fields.Selection(
@@ -35,8 +31,6 @@ class LabelTemplate(models.Model):
         default=True,
         help="If unchecked, it will allow you to hide the template without removing it.",
     )
-    preview_image = fields.Binary(string="Preview", attachment=False)
-    preview_error = fields.Char(string="Preview Error", readonly=True)
     placeholder_ids = fields.One2many(
         "natura.print.placeholder",
         "template_id",
@@ -65,15 +59,12 @@ class LabelTemplate(models.Model):
                     {
                         "template_id": template.id,
                         "placeholder": placeholder,
-                        "model_id": template.model_id.id,
                     }
                 )
 
             for placeholder, record in existing.items():
                 if placeholder not in desired:
                     record.unlink()
-                elif not record.model_id:
-                    record.model_id = template.model_id.id
 
     def _render_zpl(self, record):
         self.ensure_one()
@@ -84,33 +75,17 @@ class LabelTemplate(models.Model):
             if key and key.startswith("${") and key.endswith("}"):
                 key = key[2:-1].strip()
             mapping[key] = ph
-
         for placeholder in self._extract_placeholders(zpl):
             value = ""
             ph = mapping.get(placeholder)
-            if ph:
-                field_path = (ph.field_path or "").strip()
-                if not field_path and ph.field_id:
-                    field_path = ph.field_id.name
-                if field_path:
-                    value = self._resolve_field_path(record, field_path)
+            if ph and ph.field_id:
+                field_value = record[ph.field_id.name]
+                if isinstance(field_value, models.BaseModel):
+                    value = field_value.display_name or ""
+                else:
+                    value = "" if field_value in (False, None) else str(field_value)
             zpl = zpl.replace(f"${{{placeholder}}}", value)
         return zpl
-
-    @staticmethod
-    def _resolve_field_path(record, field_path):
-        value = record
-        try:
-            for part in field_path.split("."):
-                if not value:
-                    return ""
-                value = value[part]
-        except Exception:
-            return ""
-
-        if isinstance(value, models.BaseModel):
-            return ", ".join(value.mapped("display_name")) if value else ""
-        return "" if value in (False, None) else str(value)
 
     def action_open_test_print(self):
         self.ensure_one()
@@ -120,68 +95,14 @@ class LabelTemplate(models.Model):
         }
         return action
 
-    def action_update_preview(self):
-        self.ensure_one()
-        self._update_preview_image(silent=False)
-        return True
-
-
     @api.model_create_multi
     def create(self, vals_list):
         records = super().create(vals_list)
         records._sync_placeholders()
-        for record in records:
-            record._update_preview_image(silent=True)
         return records
 
     def write(self, vals):
         res = super().write(vals)
         if "zpl_code" in vals:
             self._sync_placeholders()
-        if {"zpl_code", "dpi", "width", "height"} & set(vals):
-            for record in self:
-                record._update_preview_image(silent=True)
         return res
-
-
-    def _labelary_dpmm(self):
-        mapping = {
-            "203": "8",
-            "300": "12",
-            "600": "24",
-        }
-        return mapping.get(self.dpi)
-
-    def _update_preview_image(self, silent=False):
-        self.ensure_one()
-        self.preview_error = False
-        if not self.zpl_code or not self.width or not self.height or not self.dpi:
-            self.preview_image = False
-            return
-
-        dpmm = self._labelary_dpmm()
-        if not dpmm:
-            self.preview_image = False
-            self.preview_error = "Unsupported DPI for Labelary preview."
-            if not silent:
-                raise UserError(self.preview_error)
-            return
-
-        url = (
-            f"https://api.labelary.com/v1/printers/{dpmm}dpmm/"
-            f"labels/{self.width}x{self.height}/0/"
-        )
-        try:
-            response = requests.post(
-                url,
-                data=self.zpl_code.encode("utf-8"),
-                headers={"Accept": "image/png"},
-                timeout=10,
-            )
-            response.raise_for_status()
-            self.preview_image = base64.b64encode(response.content)
-        except requests.RequestException as exc:
-            self.preview_image = False
-            self.preview_error = f"Preview failed: {exc}"
-            if not silent:
-                raise UserError(self.preview_error)
