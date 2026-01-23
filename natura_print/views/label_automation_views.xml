@@ -26,7 +26,8 @@
                     </div>
                     <group>
                         <field name="active"/>
-                        <field name="model_id" options="{'no_create': True}" domain="[('model', 'in', ('product.template', 'stock.lot', 'stock.quant', 'mrp.production'))]"/>
+                        <field name="available_model_ids" invisible="1"/>
+                        <field name="model_id" options="{'no_create': True}" domain="[('id', 'in', available_model_ids)]"/>
                         <field name="webhook_url"/>
                     </group>
                 </sheet>
