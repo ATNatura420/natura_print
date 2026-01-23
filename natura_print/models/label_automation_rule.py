@@ -31,6 +31,15 @@ class NaturaPrintLabelAutomation(models.Model):
 
     @api.depends()
     def _compute_available_models(self):
-        models = self.env["zpl.label.template"].sudo().mapped("model_id")
+        templates = self.env["zpl.label.template"].sudo().search([("active", "=", True)])
+        models = templates.mapped("model_id")
+        if not models:
+            allowed_model_names = [
+                "product.template",
+                "stock.lot",
+                "stock.quant",
+                "mrp.production",
+            ]
+            models = self.env["ir.model"].sudo().search([("model", "in", allowed_model_names)])
         for record in self:
             record.available_model_ids = models
