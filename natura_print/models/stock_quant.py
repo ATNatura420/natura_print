@@ -8,7 +8,7 @@ class StockQuant(models.Model):
     # Compatibility shim: some environments include views referencing stock.quant.reason_note/reason_id.
     # Keeping these fields here prevents upgrade failures until those views are cleaned up.
 
-    # reason_note = fields.Text(string="Reason Note")
+    reason_note = fields.Text(string="Reason Note")
     stock_inventory_reason_id = fields.Many2one("stock.inventory.reason", string="Reason")
     # note_required = fields.Boolean(string="Note Required")
 
