@@ -6,22 +6,35 @@
         <field name="arch" type="xml">
             <form string="Print Labels from CSV">
                 <sheet>
+                    <field name="mapping_json" invisible="1" force_save="1"/>
                     <group>
                         <field name="template_id" required="1"/>
                         <field name="printer_id" required="1"/>
                     </group>
                     <group>
-                        <field name="csv_file" filename="csv_filename" required="1"/>
+                        <field name="csv_file" filename="csv_headers_display" required="1"/>
                         <field name="delimiter"/>
                         <field name="start_row"/>
-                        <field name="headers_preview" nolabel="1" readonly="1"/>
                     </group>
+                    <div class="o_row o_natura_csv_row">
+                        <div class="o_col_6">
+                            <div class="o_natura_preview">
+                                <field name="preview_image" widget="image" nolabel="1"/>
+                                <div class="o_natura_preview_caption">Preview powered by Labelary&#8482;</div>
+                            </div>
+                        </div>
+                        <div class="o_col_6 o_natura_csv_col">
+                            <div class="o_natura_csv_preview">
+                                <field name="csv_preview" widget="html" nolabel="1" readonly="1" options="{'sanitize': False}"/>
+                            </div>
+                        </div>
+                    </div>
                     <group string="Column Mapping">
                         <field name="mapping_line_ids">
-                            <tree editable="bottom">
-                                <field name="placeholder"/>
-                                <field name="column_header"/>
-                                <field name="column_ref"/>
+                            <tree editable="bottom" create="0">
+                                <field name="placeholder" readonly="1" force_save="1"/>
+                                <field name="value_preview" readonly="1"/>
+                                <field name="column_selector" force_save="1"/>
                             </tree>
                         </field>
                     </group>
