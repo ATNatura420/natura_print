@@ -7,7 +7,7 @@
             <form string="Print MO Labels">
                 <sheet>
                     <group>
-                        <field name="template_id" required="1"/>
+                        <field name="template_id" required="1" domain="[('model_id.model', '=', 'mrp.production'), ('company_id', 'in', allowed_company_ids)]"/>
                         <field name="printer_id" required="1"/>
                     </group>
                     <group>

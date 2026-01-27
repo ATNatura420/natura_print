@@ -30,6 +30,11 @@ class ResUsers(models.Model):
         string="CSV Encoding",
         default="utf-8",
     )
+    natura_print_csv_test_rows = fields.Integer(
+        string="CSV Test Print Rows",
+        default=12,
+        help="Number of CSV rows to include when using Test Print in the CSV wizard.",
+    )
 
     def _natura_print_allowed_model_names(self):
         return NATURA_PRINT_ALLOWED_MODELS
@@ -51,7 +56,11 @@ class ResUsers(models.Model):
         pref = self.natura_print_template_pref_ids.filtered(
             lambda rec: rec.model_id.model == model_name
         )[:1]
-        return pref.template_id if pref else False
+        if not pref or not pref.template_id:
+            return False
+        if pref.template_id.company_id not in self.env.companies:
+            return False
+        return pref.template_id
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -81,7 +90,7 @@ class NaturaPrintUserTemplatePref(models.Model):
     template_id = fields.Many2one(
         "zpl.label.template",
         string="Template",
-        domain="[('model_id', '=', model_id)]",
+        domain="[('model_id', '=', model_id), ('company_id', 'in', allowed_company_ids)]",
     )
 
     _sql_constraints = [

@@ -74,7 +74,10 @@ class NaturaPrintService(models.AbstractModel):
             return template
 
         if template_name:
-            template = self.env["zpl.label.template"].search([("name", "=", template_name)], limit=1)
+            template = self.env["zpl.label.template"].search(
+                [("name", "=", template_name), ("company_id", "in", self.env.companies.ids)],
+                limit=1,
+            )
             if not template:
                 raise UserError(_("Label template not found (name=%s).") % template_name)
             return template

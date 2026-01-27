@@ -20,3 +20,51 @@
     margin-top: 6px;
     font-size: 12px;
 }
+
+.o_natura_csv_preview {
+    max-height: 220px;
+    width: 100%;
+    overflow: auto;
+    border: 1px solid #e6e6e6;
+    border-radius: 4px;
+    background: #fff;
+    padding: 6px;
+}
+
+.o_natura_csv_row {
+    width: 100%;
+}
+
+.o_natura_csv_col {
+    display: flex;
+}
+
+.o_natura_csv_preview .o_natura_csv_table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 100%;
+    font-size: 12px;
+    table-layout: fixed;
+}
+
+.o_natura_csv_preview .o_natura_csv_table th,
+.o_natura_csv_preview .o_natura_csv_table td {
+    border-bottom: 1px solid #eee;
+    padding: 4px 8px;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.o_natura_csv_preview .o_natura_csv_table th {
+    position: sticky;
+    top: 0;
+    background: #f7f7f7;
+    z-index: 1;
+    font-weight: 600;
+}
+
+.o_natura_csv_preview .o_natura_csv_table tr:hover td {
+    background: #fafafa;
+}

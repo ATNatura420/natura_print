@@ -23,6 +23,7 @@
                 <group col="2">
                     <group>
                         <field name="model_id" options="{'no_create': True}"/>
+                        <field name="company_id" options="{'no_create': True}"/>
                         <field name="width"/>
                         <field name="height"/>
                         <field name="dpi"/>
@@ -63,6 +64,7 @@
         <tree string="ZPL Label Templates">
             <field name="name" string="Title"/>
             <field name="model_id"/>
+            <field name="company_id"/>
             <field name="width"/>
             <field name="dpi"/>
             <field name="height"/>
@@ -83,6 +85,7 @@
             <field name="active"/>
             <filter string="DPI" name="dpi_group" context="{'group_by': 'dpi'}"/>
             <filter string="Model" name="model_id_group" context="{'group_by': 'model_id'}"/>
+            <filter string="Company" name="company_group" context="{'group_by': 'company_id'}"/>
             <separator/>
             <filter string="Active" name="active" domain="[('active', '=', True)]"/>
             <filter string="Inactive" name="inactive" domain="[('active', '=', False)]"/>

@@ -21,6 +21,14 @@ class LabelTemplate(models.Model):
         domain="[('model', 'in', ('product.template', 'stock.lot', 'stock.quant', 'mrp.production'))]",
         ondelete="cascade",
     )
+    company_id = fields.Many2one(
+        "res.company",
+        string="Company",
+        required=True,
+        default=lambda self: self.env.company,
+        index=True,
+        ondelete="restrict",
+    )
     dpi = fields.Selection(
         [('203', '8 dpmm (203 DPI)'), ('300', '12 dpmm (300 DPI)'), ('600', '24 dpmm (600 DPI)')],
         string='DPI',
