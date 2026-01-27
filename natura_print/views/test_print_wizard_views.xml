@@ -7,7 +7,7 @@
             <form string="Test Print">
                 <sheet>
                     <group>
-                        <field name="template_id" readonly="1"/>
+                        <field name="template_id" readonly="1" domain="[('company_id', 'in', allowed_company_ids)]"/>
                         <field name="printer_id" required="1"/>
                         <field name="qty" required="1"/>
                     </group>

@@ -3,6 +3,7 @@ import csv
 import io
 import html
 import json
+import re
 
 import requests
 
@@ -12,6 +13,7 @@ from odoo.exceptions import UserError
 
 CSV_BATCH_SIZE = 12
 CSV_PREVIEW_ROWS = 10
+GROUPED_PLACEHOLDER_RE = re.compile(r"^(.*)_R(\d+)$", re.IGNORECASE)
 
 
 class NaturaPrintCsvLabelWizard(models.TransientModel):
@@ -56,6 +58,7 @@ class NaturaPrintCsvLabelWizard(models.TransientModel):
     source_res_id = fields.Integer(string="Source Record", readonly=True)
     preview_image = fields.Binary(string="Preview", attachment=False)
     preview_error = fields.Char(string="Preview Error", readonly=True)
+    test_print_done = fields.Boolean(string="Test Print Done", default=False)
     mapping_line_ids = fields.One2many(
         "natura.print.csv.mapping.line",
         "wizard_id",
@@ -72,7 +75,9 @@ class NaturaPrintCsvLabelWizard(models.TransientModel):
             res["source_res_id"] = self.env.context.get("default_source_res_id")
         if template_id and "mapping_line_ids" in fields_list:
             template = self.env["zpl.label.template"].browse(template_id)
-            placeholders = template._extract_placeholders(template.zpl_code)
+            placeholders, group_map = self._collapse_grouped_placeholders(
+                template._extract_placeholders(template.zpl_code)
+            )
             base_values = self._build_base_values(template, res)
             res["mapping_line_ids"] = [
                 (
@@ -80,7 +85,9 @@ class NaturaPrintCsvLabelWizard(models.TransientModel):
                     0,
                     {
                         "placeholder": placeholder,
-                        "value_preview": base_values.get(placeholder, ""),
+                        "value_preview": self._placeholder_preview_value(
+                            placeholder, base_values, group_map
+                        ),
                     },
                 )
                 for placeholder in placeholders
@@ -98,7 +105,9 @@ class NaturaPrintCsvLabelWizard(models.TransientModel):
             self.preview_image = False
             self.preview_error = False
             return
-        placeholders = self.template_id._extract_placeholders(self.template_id.zpl_code)
+        placeholders, group_map = self._collapse_grouped_placeholders(
+            self.template_id._extract_placeholders(self.template_id.zpl_code)
+        )
         base_values = self._build_base_values(self.template_id)
         self.mapping_line_ids = [(5, 0, 0)]
         self.mapping_line_ids = [
@@ -107,7 +116,9 @@ class NaturaPrintCsvLabelWizard(models.TransientModel):
                 0,
                 {
                     "placeholder": placeholder,
-                    "value_preview": base_values.get(placeholder, ""),
+                    "value_preview": self._placeholder_preview_value(
+                        placeholder, base_values, group_map
+                    ),
                 },
             )
             for placeholder in placeholders
@@ -176,6 +187,36 @@ class NaturaPrintCsvLabelWizard(models.TransientModel):
     def _normalize_header(value):
         value = str(value or "").strip().lower()
         return value.replace(" ", "").replace("_", "").replace("-", "")
+
+    def _collapse_grouped_placeholders(self, placeholders):
+        grouped = {}
+        collapsed = []
+        seen = set()
+        for placeholder in placeholders:
+            match = GROUPED_PLACEHOLDER_RE.match(placeholder or "")
+            if match:
+                base = match.group(1)
+                idx = int(match.group(2))
+                grouped.setdefault(base, []).append((idx, placeholder))
+                if base not in seen:
+                    collapsed.append(base)
+                    seen.add(base)
+                continue
+            if placeholder not in seen:
+                collapsed.append(placeholder)
+                seen.add(placeholder)
+        group_map = {}
+        for base, items in grouped.items():
+            group_map[base] = [ph for _, ph in sorted(items, key=lambda item: item[0])]
+        return collapsed, group_map
+
+    def _placeholder_preview_value(self, placeholder, base_values, group_map):
+        if placeholder in base_values:
+            return base_values.get(placeholder, "")
+        group_items = group_map.get(placeholder)
+        if group_items:
+            return base_values.get(group_items[0], "")
+        return ""
 
     def _parse_headers(self, text):
         reader = csv.reader(io.StringIO(text), delimiter=(self.delimiter or ",")[:1])
@@ -356,7 +397,16 @@ class NaturaPrintCsvLabelWizard(models.TransientModel):
         except requests.RequestException as exc:
             raise UserError(_("Print failed: %s") % exc) from exc
 
-    def action_print_csv(self):
+    def _return_wizard_action(self):
+        return {
+            "type": "ir.actions.act_window",
+            "res_model": "natura.print.csv.label.wizard",
+            "res_id": self.id,
+            "view_mode": "form",
+            "target": "new",
+        }
+
+    def _get_csv_data(self):
         self.ensure_one()
         # Ensure any inline edits in the one2many are persisted before reading.
         self.env.flush_all()
@@ -366,48 +416,110 @@ class NaturaPrintCsvLabelWizard(models.TransientModel):
         rows = list(reader)
         if not rows:
             raise UserError(_("CSV file is empty."))
+        return rows
 
-        headers = rows[0]
-        # Prefer JSON snapshot from onchange (round-tripped via hidden field).
+    def _get_mapping(self, headers):
         mapping = {}
+        # Prefer JSON snapshot from onchange (round-tripped via hidden field).
         if self.mapping_json:
             try:
                 mapping = self._build_mapping(headers, json.loads(self.mapping_json))
             except Exception:
                 mapping = {}
         if not mapping:
-            # Prefer values persisted on mapping lines.
             lines_read = self.mapping_line_ids.read(
                 ["placeholder", "column_selector", "column_header", "column_ref"]
             )
             mapping = self._build_mapping(headers, lines_read)
         if not mapping:
-            # Fallback: direct DB search (if transient got recreated).
             lines_db = self.env["natura.print.csv.mapping.line"].search([("wizard_id", "=", self.id)])
             mapping = self._build_mapping(headers, lines_db) if lines_db else {}
+        return mapping
+
+    def _get_rows_per_label(self):
+        _, group_map = self._collapse_grouped_placeholders(
+            self.template_id._extract_placeholders(self.template_id.zpl_code)
+        )
+        if not group_map:
+            return 1, {}
+        rows_per_label = max(len(items) for items in group_map.values() if items) or 1
+        return rows_per_label, group_map
+
+    def _aligned_count(self, count, rows_per_label):
+        if count <= 0:
+            return 0
+        aligned = (count // rows_per_label) * rows_per_label
+        return max(rows_per_label, aligned) if aligned else rows_per_label
+
+    def _print_csv_range(self, rows, start_index, end_index):
+        headers = rows[0]
+        mapping = self._get_mapping(headers)
         source_record = self._get_source_record()
-        base_values = {}
-        if source_record:
-            base_values = self.template_id._values_from_record(source_record)
-        start_index = max((self.start_row or 2) - 1, 0)
-        if start_index >= len(rows):
+        base_values = self.template_id._values_from_record(source_record) if source_record else {}
+        if start_index >= len(rows) or start_index >= end_index:
             raise UserError(_("Start row is beyond the end of the CSV file."))
 
+        rows_per_label, group_map = self._get_rows_per_label()
         batch = []
-        for row in rows[start_index:]:
+        for label_start in range(start_index, min(end_index, len(rows)), rows_per_label):
             values = dict(base_values)
+            current_row = rows[label_start]
             for placeholder, idx in mapping.items():
-                if idx < len(row):
-                    values[placeholder] = row[idx]
+                if placeholder in group_map:
+                    continue
+                if idx < len(current_row):
+                    values[placeholder] = current_row[idx]
+            for base, placeholders in group_map.items():
+                idx = mapping.get(base)
+                if idx is None:
+                    continue
+                for offset, placeholder in enumerate(placeholders):
+                    row_idx = label_start + offset
+                    if row_idx >= len(rows) or row_idx >= end_index:
+                        values[placeholder] = ""
+                        continue
+                    row = rows[row_idx]
+                    values[placeholder] = row[idx] if idx < len(row) else ""
             zpl = self.template_id._render_zpl_from_values(values)
             batch.append(zpl)
             if len(batch) >= CSV_BATCH_SIZE:
                 self._send_batch("".join(batch))
                 batch = []
-
         if batch:
             self._send_batch("".join(batch))
 
+    def action_print_csv(self):
+        self.ensure_one()
+        rows = self._get_csv_data()
+        start_index = max((self.start_row or 2) - 1, 0)
+        self._print_csv_range(rows, start_index, len(rows))
+        return {"type": "ir.actions.act_window_close"}
+
+    def action_test_print_csv(self):
+        self.ensure_one()
+        rows = self._get_csv_data()
+        start_index = max((self.start_row or 2) - 1, 0)
+        rows_per_label, _ = self._get_rows_per_label()
+        test_rows = int(self.env.user.natura_print_csv_test_rows or CSV_BATCH_SIZE)
+        test_rows_aligned = self._aligned_count(test_rows, rows_per_label)
+        end_index = min(len(rows), start_index + test_rows_aligned)
+        self._print_csv_range(rows, start_index, end_index)
+        self.test_print_done = True
+        return self._return_wizard_action()
+
+    def action_print_csv_remainder(self):
+        self.ensure_one()
+        if not self.test_print_done:
+            raise UserError(_("Please run Test Print before printing the remainder."))
+        rows = self._get_csv_data()
+        start_index = max((self.start_row or 2) - 1, 0)
+        rows_per_label, _ = self._get_rows_per_label()
+        test_rows = int(self.env.user.natura_print_csv_test_rows or CSV_BATCH_SIZE)
+        test_rows_aligned = self._aligned_count(test_rows, rows_per_label)
+        remainder_start = start_index + test_rows_aligned
+        if remainder_start >= len(rows):
+            raise UserError(_("There are no remaining rows to print."))
+        self._print_csv_range(rows, remainder_start, len(rows))
         return {"type": "ir.actions.act_window_close"}
 
 

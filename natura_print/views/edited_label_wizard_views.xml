@@ -7,7 +7,7 @@
             <form string="Print with Edits">
                 <sheet>
                     <group>
-                        <field name="template_id" required="1"/>
+                        <field name="template_id" required="1" domain="[('model_id.model', '=', source_model), ('company_id', 'in', allowed_company_ids)]"/>
                         <field name="printer_id" required="1"/>
                         <field name="qty" required="1"/>
                         <field name="source_model" invisible="1"/>

@@ -10,12 +10,13 @@
                     <group>
                         <field name="natura_print_default_printer_id" options="{'no_create': True}"/>
                         <field name="natura_print_csv_encoding"/>
+                        <field name="natura_print_csv_test_rows"/>
                     </group>
                     <group string="Default Templates">
                         <field name="natura_print_template_pref_ids">
                             <tree editable="bottom">
                                 <field name="model_id" options="{'no_create': True, 'no_create_edit': True}"/>
-                                <field name="template_id" options="{'no_create': True, 'no_create_edit': True}"/>
+                                <field name="template_id" options="{'no_create': True, 'no_create_edit': True}" domain="[('model_id', '=', model_id), ('company_id', 'in', allowed_company_ids)]"/>
                             </tree>
                         </field>
                     </group>
