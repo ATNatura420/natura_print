@@ -13,7 +13,8 @@
                     <group>
                         <field name="line_ids">
                             <tree editable="bottom">
-                                <field name="lot_id"/>
+                                <field name="line_label" readonly="1"/>
+                                <field name="lot_id" column_invisible="1"/>
                                 <field name="qty"/>
                             </tree>
                         </field>

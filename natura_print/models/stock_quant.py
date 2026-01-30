@@ -10,7 +10,7 @@ class StockQuant(models.Model):
 
     # reason_note = fields.Text(string="Reason Note")
     # reason_id = fields.Many2one("stock.inventory.reason", string="Reason")
-    stock_inventory_reason_id = fields.Many2one("stock.inventory.reason", string="Reason")
+    # stock_inventory_reason_id = fields.Many2one("stock.inventory.reason", string="Reason")
     # note_required = fields.Boolean(string="Note Required")
 
     def action_open_print_wizard(self):

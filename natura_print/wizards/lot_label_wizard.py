@@ -137,15 +137,32 @@ class NaturaPrintLotLabelWizard(models.TransientModel):
 class NaturaPrintLotLabelLine(models.TransientModel):
     _name = "natura.print.lot.label.line"
     _description = "Natura Print Lot Label Line"
+    _rec_name = "line_label"
 
     wizard_id = fields.Many2one(
         "natura.print.lot.label.wizard",
         required=True,
         ondelete="cascade",
     )
+
     lot_id = fields.Many2one(
         "stock.lot",
         string="Lot/Serial",
         required=True,
+        invisible=True
     )
+
+    line_label = fields.Char(
+        compute="_compute_line_label",
+        string="Lot/Serial — Product",
+        store=False
+    )
+
     qty = fields.Integer(string="Quantity", default=1, required=True)
+
+    def _compute_line_label(self):
+        for line in self:
+            lot = line.lot_id.name or ""
+            product = line.lot_id.product_id.display_name if line.lot_id.product_id else ""
+            parts = [p for p in [lot, product] if p]
+            line.line_label = " — ".join(parts)
