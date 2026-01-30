@@ -19,6 +19,7 @@ class NaturaPrintPlaceholder(models.Model):
         ondelete="cascade",
     )
     placeholder = fields.Char(string="Placeholder", required=True)
+   
     field_path = fields.Char(
         string="Field Path",
         compute="_compute_field_path",

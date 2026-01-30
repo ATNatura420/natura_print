@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="natura_print_user_template_pref_rule" model="ir.rule">
+        <field name="name">Natura Print Template Pref: own user</field>
+        <field name="model_id" ref="natura_print.model_natura_print_user_template_pref"/>
+        <field name="domain_force">[("user_id", "=", user.id)]</field>
+        <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+</odoo>

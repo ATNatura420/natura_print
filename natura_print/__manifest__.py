@@ -6,7 +6,8 @@
     'description': "",
     'depends': ['base', 'product', 'stock', 'mrp'],
     'data': [
-        'security/ir.model.access.csv', 
+        'security/ir.model.access.csv',
+        'security/natura_print_rules.xml',
         'views/printers_list_views.xml', 
         'views/label_template_views.xml',
         'views/label_template_placeholder_views.xml',
