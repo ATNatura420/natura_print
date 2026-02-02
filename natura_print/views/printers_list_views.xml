@@ -62,6 +62,7 @@
             <field name="location"/>
             <field name="active"/>
             <filter string="DPI" name="dpi_group" context="{'group_by': 'dpi'}"/>
+            <filter string="Location" name="location_group" context="{'group_by': 'location'}"/>
             <separator/>
             <filter string="Active" name="active" domain="[('active', '=', True)]"/>
             <filter string="Inactive" name="inactive" domain="[('active', '=', False)]"/>
