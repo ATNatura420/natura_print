@@ -260,8 +260,6 @@ class NaturaPrintEditedLabelWizard(models.TransientModel):
         self.ensure_one()
         self.env.flush_all()
         self._ensure_source_context()
-        if self.template_id.model_id.model != "product.template":
-            raise UserError(_("Print from CSV is only available for Product Template templates."))
 
         action = self.env.ref("natura_print.action_natura_print_csv_label_wizard").read()[0]
         action["context"] = {
