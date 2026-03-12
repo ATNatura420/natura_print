@@ -33,6 +33,8 @@
                 <footer>
                     <button name="action_update_preview" type="object" string="Update Preview" class="btn-secondary"
                             context="{'force_save': True}"/>
+                    <button name="action_open_csv_wizard" type="object" string="Print from CSV" class="btn-secondary"
+                            context="{'force_save': True}"/>
                     <button name="action_print" type="object" string="Print" class="btn-primary"
                             context="{'force_save': True}"/>
                     <button string="Cancel" class="btn-secondary" special="cancel"/>

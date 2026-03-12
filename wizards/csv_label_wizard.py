@@ -59,6 +59,8 @@ class NaturaPrintCsvLabelWizard(models.TransientModel):
         help="Preview of the CSV header and first rows.",
     )
     mapping_json = fields.Text(string="Mapping JSON")
+    seed_values_json = fields.Text(string="Seed Values JSON")
+    seed_override_placeholders_json = fields.Text(string="Seed Override Placeholders JSON")
     source_model = fields.Char(string="Source Model", readonly=True)
     source_res_id = fields.Integer(string="Source Record", readonly=True)
     preview_image = fields.Binary(string="Preview", attachment=False)
@@ -85,6 +87,12 @@ class NaturaPrintCsvLabelWizard(models.TransientModel):
     def default_get(self, fields_list):
         res = super().default_get(fields_list)
         template_id = res.get("template_id") or self.env.context.get("default_template_id")
+        if not res.get("seed_values_json"):
+            res["seed_values_json"] = self.env.context.get("default_seed_values_json")
+        if not res.get("seed_override_placeholders_json"):
+            res["seed_override_placeholders_json"] = self.env.context.get(
+                "default_seed_override_placeholders_json"
+            )
         if "source_model" in fields_list and not res.get("source_model"):
             res["source_model"] = self.env.context.get("default_source_model")
         if "source_res_id" in fields_list and not res.get("source_res_id"):
@@ -173,20 +181,32 @@ class NaturaPrintCsvLabelWizard(models.TransientModel):
     def _build_base_values(self, template, defaults=None):
         model_name = None
         res_id = None
+        seed_values_json = None
         if defaults:
             model_name = defaults.get("source_model")
             res_id = defaults.get("source_res_id")
+            seed_values_json = defaults.get("seed_values_json")
         if not model_name:
             model_name = self.env.context.get("default_source_model")
         if not res_id:
             res_id = self.env.context.get("default_source_res_id")
+        if not seed_values_json:
+            seed_values_json = self.seed_values_json or self.env.context.get("default_seed_values_json")
         if model_name and res_id:
             source = self.env[model_name].browse(res_id)
         elif template and template.model_id:
             source = self.env[template.model_id.model].browse()
         else:
             source = self.env["zpl.label.template"].browse()
-        return template._values_from_record(source) if source else {}
+        values = template._values_from_record(source) if source else {}
+        if seed_values_json:
+            try:
+                seed_values = json.loads(seed_values_json)
+            except Exception:
+                seed_values = {}
+            if isinstance(seed_values, dict):
+                values.update(seed_values)
+        return values
 
     def _render_preview_image(self, template, values):
         if not template:
@@ -301,7 +321,15 @@ class NaturaPrintCsvLabelWizard(models.TransientModel):
         rows = list(reader)
         self.csv_preview = self._build_csv_preview(rows)
         normalized = {self._normalize_header(h): h for h in headers}
+        protected = set()
+        if self.seed_override_placeholders_json:
+            try:
+                protected = set(json.loads(self.seed_override_placeholders_json) or [])
+            except Exception:
+                protected = set()
         for line in self.mapping_line_ids:
+            if line.placeholder in protected:
+                continue
             if line.column_selector:
                 continue
             key = self._normalize_header(line.placeholder)
@@ -482,8 +510,7 @@ class NaturaPrintCsvLabelWizard(models.TransientModel):
     def _print_csv_range(self, rows, start_index, end_index):
         headers = rows[0]
         mapping = self._get_mapping(headers)
-        source_record = self._get_source_record()
-        base_values = self.template_id._values_from_record(source_record) if source_record else {}
+        base_values = self._build_base_values(self.template_id)
         if start_index >= len(rows) or start_index >= end_index:
             raise UserError(_("Start row is beyond the end of the CSV file."))
 

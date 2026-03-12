@@ -7,6 +7,8 @@
             <form string="Print Labels from CSV">
                 <sheet>
                     <field name="mapping_json" invisible="1" force_save="1"/>
+                    <field name="seed_values_json" invisible="1"/>
+                    <field name="seed_override_placeholders_json" invisible="1"/>
                     <field name="test_print_done" invisible="1"/>
                     <field name="source_model" invisible="1"/>
                     <field name="available_template_ids" invisible="1"/>

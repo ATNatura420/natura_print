@@ -45,17 +45,17 @@ class NaturaPrintSaleLineKitLabelWizard(models.TransientModel):
         self.ensure_one()
         line = self.sale_line_id
         model_name = template.model_id.model
-        if model_name == "sale.order.line":
-            return line
-        if model_name == "product.template":
-            return line.product_template_id
-        if model_name == "stock.quant":
-            raise UserError(_("Template '%s' requires stock.quant context, which is not available from a sales line.") % template.display_name)
-        if model_name == "stock.lot":
-            raise UserError(_("Template '%s' requires stock.lot context, which is not available from a sales line.") % template.display_name)
-        if model_name == "mrp.production":
-            raise UserError(_("Template '%s' requires mrp.production context, which is not available from a sales line.") % template.display_name)
-        raise UserError(_("Unsupported template model '%s' for sales line printing.") % model_name)
+        # if model_name == "sale.order.line":
+        #     return line
+        # if model_name == "product.template":
+        #     return line.product_template_id
+        # if model_name == "stock.quant":
+        #     raise UserError(_("Template '%s' requires stock.quant context, which is not available from a sales line.") % template.display_name)
+        # if model_name == "stock.lot":
+        #     raise UserError(_("Template '%s' requires stock.lot context, which is not available from a sales line.") % template.display_name)
+        # if model_name == "mrp.production":
+        #     raise UserError(_("Template '%s' requires mrp.production context, which is not available from a sales line.") % template.display_name)
+        # raise UserError(_("Unsupported template model '%s' for sales line printing.") % model_name)
 
     def _get_print_api_config(self):
         self.ensure_one()

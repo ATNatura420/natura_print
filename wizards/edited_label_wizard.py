@@ -256,6 +256,26 @@ class NaturaPrintEditedLabelWizard(models.TransientModel):
         self._send_labels(zpl)
         return {"type": "ir.actions.act_window_close"}
 
+    def action_open_csv_wizard(self):
+        self.ensure_one()
+        self.env.flush_all()
+        self._ensure_source_context()
+        if self.template_id.model_id.model != "product.template":
+            raise UserError(_("Print from CSV is only available for Product Template templates."))
+
+        action = self.env.ref("natura_print.action_natura_print_csv_label_wizard").read()[0]
+        action["context"] = {
+            "default_template_id": self.template_id.id,
+            "default_printer_id": self.printer_id.id,
+            "default_source_model": self.source_model,
+            "default_source_res_id": self.source_res_id,
+            "default_seed_values_json": json.dumps(self._build_values()),
+            "default_seed_override_placeholders_json": json.dumps(
+                sorted(self._get_override_placeholders())
+            ),
+        }
+        return action
+
 
 class NaturaPrintEditedLabelLine(models.TransientModel):
     _name = "natura.print.edited.label.line"
