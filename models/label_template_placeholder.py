@@ -62,6 +62,13 @@ class NaturaPrintPlaceholder(models.Model):
         readonly=True,
         help="Dot-separated field path starting from the default model, e.g. product_id.name",
     )
+    attribute_name = fields.Char(
+        string="Attribute Name",
+        help=(
+            "Optional attribute filter for variant values, e.g. Size or Color. "
+            "Used by attribute fallback resolution."
+        ),
+    )
     related_model = fields.Char(
         string="Related Model",
         compute="_compute_related_model",

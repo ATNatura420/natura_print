@@ -149,7 +149,11 @@ class LabelTemplate(models.Model):
                 if not field_path and ph.field_id:
                     field_path = ph.field_id.name
                 if field_path:
-                    value = self._resolve_field_path(record, field_path)
+                    raw_value = self._resolve_field_path(record, field_path, as_text=False)
+                    raw_value = self._filter_attribute_records(raw_value, ph.attribute_name)
+                    value = self._value_to_text(raw_value)
+                    if not value and ph.attribute_name:
+                        value = self._resolve_attribute_value(record, raw_value, ph.attribute_name)
                 value = ph._apply_transform(value)
             zpl = zpl.replace(f"${{{placeholder}}}", value)
         return zpl
@@ -194,25 +198,98 @@ class LabelTemplate(models.Model):
                 if not field_path and ph.field_id:
                     field_path = ph.field_id.name
                 if field_path:
-                    value = self._resolve_field_path(record, field_path)
+                    raw_value = self._resolve_field_path(record, field_path, as_text=False)
+                    raw_value = self._filter_attribute_records(raw_value, ph.attribute_name)
+                    value = self._value_to_text(raw_value)
+                    if not value and ph.attribute_name:
+                        value = self._resolve_attribute_value(record, raw_value, ph.attribute_name)
                 value = ph._apply_transform(value)
             mapping[placeholder] = value
         return mapping
 
     @staticmethod
-    def _resolve_field_path(record, field_path):
+    def _resolve_field_path(record, field_path, as_text=True):
         value = record
         try:
             for part in field_path.split("."):
                 if not value:
-                    return ""
+                    return "" if as_text else value
                 value = value[part]
         except Exception:
             return ""
 
+        return LabelTemplate._value_to_text(value) if as_text else value
+
+    @staticmethod
+    def _value_to_text(value):
         if isinstance(value, models.BaseModel):
             return ", ".join(value.mapped("display_name")) if value else ""
         return "" if value in (False, None) else str(value)
+
+    @staticmethod
+    def _filter_attribute_records(value, attribute_name):
+        if not attribute_name or not isinstance(value, models.BaseModel):
+            return value
+        target = str(attribute_name).strip().lower()
+        if not target:
+            return value
+        filtered = value.browse()
+        for rec in value:
+            attr = ""
+            if "attribute_id" in rec._fields and rec.attribute_id:
+                attr = rec.attribute_id.name or rec.attribute_id.display_name or ""
+            elif "attribute_line_id" in rec._fields and rec.attribute_line_id and rec.attribute_line_id.attribute_id:
+                attr = rec.attribute_line_id.attribute_id.name or rec.attribute_line_id.attribute_id.display_name or ""
+            elif (
+                "product_attribute_value_id" in rec._fields
+                and rec.product_attribute_value_id
+                and rec.product_attribute_value_id.attribute_id
+            ):
+                attr = rec.product_attribute_value_id.attribute_id.name or rec.product_attribute_value_id.attribute_id.display_name or ""
+            if target in str(attr).strip().lower():
+                filtered |= rec
+        return filtered
+
+    def _resolve_attribute_value(self, source_record, raw_value, attribute_name):
+        attr_target = (attribute_name or "").strip().lower()
+        if not attr_target:
+            return ""
+
+        products = self.env["product.product"]
+        templates = self.env["product.template"]
+
+        def _collect_candidates(candidate):
+            nonlocal products, templates
+            if not isinstance(candidate, models.BaseModel) or not candidate:
+                return
+            if candidate._name == "product.product":
+                products |= candidate
+            if candidate._name == "product.template":
+                templates |= candidate
+            if "product_id" in candidate._fields:
+                products |= candidate.mapped("product_id")
+            if "product_tmpl_id" in candidate._fields:
+                templates |= candidate.mapped("product_tmpl_id")
+
+        _collect_candidates(source_record)
+        _collect_candidates(raw_value)
+        templates |= products.mapped("product_tmpl_id")
+
+        # Variant-level selected values (best for quant/lot/product.product contexts)
+        ptavs = products.mapped("product_template_attribute_value_ids").filtered(
+            lambda val: (val.attribute_id.name or "").strip().lower() == attr_target
+        )
+        if ptavs:
+            return ", ".join(ptavs.mapped("name"))
+
+        # Template-level possible values fallback
+        lines = templates.mapped("attribute_line_ids").filtered(
+            lambda line: (line.attribute_id.name or "").strip().lower() == attr_target
+        )
+        if lines:
+            return ", ".join(lines.mapped("value_ids.name"))
+
+        return ""
 
     def action_open_test_print(self):
         self.ensure_one()

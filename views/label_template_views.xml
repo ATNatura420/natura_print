@@ -51,6 +51,7 @@
                                 <field name="field_id" domain="[('model_id', '=', parent.model_id)]" options="{'no_create': True, 'no_create_edit': True}"/>
                                 <field name="related_field_id" domain="[('model', '=', related_model)]" options="{'no_create': True, 'no_create_edit': True}"/>
                                 <field name="field_path" readonly="1"/>
+                                <field name="attribute_name" optional="hide"/>
                                 <field name="transform_type"/>
                                 <field name="split_delimiter" optional="hide"/>
                                 <field name="split_part" optional="hide"/>

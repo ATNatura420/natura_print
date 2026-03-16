@@ -4,7 +4,7 @@
     'category': 'Inventory/Label Printing',
     'summary': 'Manage Label Templates and printers and print labels',
     'description': "",
-    'depends': ['base', 'product', 'stock', 'mrp', 'sale', 'metrc'],
+    'depends': ['base', 'product', 'stock', 'mrp', 'sale'],
     'data': [
         'security/ir.model.access.csv',
         'security/natura_print_rules.xml',
