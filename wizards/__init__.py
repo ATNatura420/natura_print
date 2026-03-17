@@ -5,6 +5,7 @@ from . import mrp_label_wizard
 from . import test_print_wizard
 from . import csv_label_wizard
 from . import edited_label_wizard
+from . import print_multiples_wizard
 from . import label_automation_wizard
 from . import sale_line_kit_label_wizard
 from . import transfer_line_label_wizard

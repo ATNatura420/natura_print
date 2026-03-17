@@ -169,6 +169,21 @@ class NaturaPrintQuantLabelWizard(models.TransientModel):
         }
         return action
 
+    def action_open_multiples_wizard(self):
+        self.ensure_one()
+        if len(self.line_ids) != 1:
+            raise UserError(_("Select exactly one line to print multiples."))
+        record = self.line_ids[0].quant_id
+        action = self.env.ref("natura_print.action_natura_print_multiples_wizard").read()[0]
+        action["context"] = {
+            "default_template_id": self.template_id.id,
+            "default_printer_id": self.printer_id.id,
+            "default_source_model": record._name,
+            "default_source_res_id": record.id,
+            "default_label_count": 1,
+        }
+        return action
+
     def action_open_label_automation_wizard(self):
         self.ensure_one()
         if len(self.line_ids) != 1:

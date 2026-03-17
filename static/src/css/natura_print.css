@@ -68,3 +68,70 @@
 .o_natura_csv_preview .o_natura_csv_table tr:hover td {
     background: #fafafa;
 }
+
+.o_natura_print_multiples_wizard .o_natura_pm_container {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.o_natura_print_multiples_wizard .o_natura_pm_controls .o_field_widget {
+    margin-bottom: 8px;
+}
+
+.o_natura_print_multiples_wizard .o_natura_pm_mapping {
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+}
+
+.o_natura_print_multiples_wizard .o_natura_pm_mapping > span {
+    font-weight: 600;
+}
+
+.o_natura_print_multiples_wizard .o_natura_pm_mapping .o_field_widget {
+    margin-bottom: 0;
+}
+
+.o_natura_print_multiples_wizard .o_natura_pm_mapping .o_field_char,
+.o_natura_print_multiples_wizard .o_natura_pm_mapping input {
+    border: 0 !important;
+    background: transparent !important;
+    padding: 0 !important;
+}
+
+.o_natura_print_multiples_wizard .o_natura_pm_inputs_header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.o_natura_print_multiples_wizard .o_natura_pm_inputs_header .right {
+    opacity: 0.75;
+    font-weight: 500;
+}
+
+.o_natura_print_multiples_wizard .o_natura_pm_lines .o_list_table thead th:nth-child(2) {
+    width: 56px;
+}
+
+.o_natura_print_multiples_wizard .o_natura_pm_status {
+    border: 1px dashed #2c3f68;
+    border-radius: 10px;
+    padding: 12px 14px;
+    background: rgba(10, 26, 59, 0.15);
+}
+
+.o_natura_print_multiples_wizard .o_natura_pm_status .o_field_widget {
+    margin-bottom: 0;
+}
+
+.o_natura_print_multiples_wizard .o_natura_pm_status .o_field_char,
+.o_natura_print_multiples_wizard .o_natura_pm_status input {
+    border: 0 !important;
+    background: transparent !important;
+    padding: 0 !important;
+    font-weight: 500;
+}

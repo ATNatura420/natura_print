@@ -32,6 +32,7 @@
         'views/mrp_bom_views.xml',
         'views/sale_line_kit_label_wizard_views.xml',
         'views/transfer_line_label_wizard_views.xml',
+        'views/print_multiples_wizard_views.xml',
         'views/sale_order_views.xml',
         'views/natura_print_menus.xml'
         ],

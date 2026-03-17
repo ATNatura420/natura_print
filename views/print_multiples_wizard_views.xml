@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_natura_print_multiples_wizard_form" model="ir.ui.view">
+        <field name="name">natura.print.multiples.wizard.form</field>
+        <field name="model">natura.print.multiples.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Print Multiples" class="o_natura_print_multiples_wizard">
+                <sheet>
+                    <field name="available_template_ids" invisible="1"/>
+                    <field name="source_model" invisible="1"/>
+                    <field name="source_res_id" invisible="1"/>
+                    <field name="placeholder_1" invisible="1"/>
+                    <field name="placeholder_2" invisible="1"/>
+                    <field name="placeholder_3" invisible="1"/>
+                    <field name="placeholder_4" invisible="1"/>
+                    <div class="o_natura_pm_container">
+                        <div class="o_natura_pm_controls">
+                            <field name="template_id" required="1" domain="[('id', 'in', available_template_ids)]"/>
+                            <field name="printer_id" required="1"/>
+                            <field name="label_count" required="1"/>
+                        </div>
+
+                        <div class="o_natura_pm_mapping muted">
+                            <span>Input Mapping:</span>
+                            <field name="placeholder_help" readonly="1" nolabel="1"/>
+                        </div>
+
+                        <div class="o_natura_pm_inputs_header">
+                            <div class="left">Per container inputs (Grams)</div>
+                            <div class="right">Tare | Product</div>
+                        </div>
+
+                        <field name="line_ids" nolabel="1">
+                            <tree editable="bottom" create="0" delete="0" class="o_natura_pm_lines">
+                                <field name="sequence" readonly="1"/>
+                                <field name="value_1" string="Tare" column_invisible="not parent.placeholder_1"/>
+                                <field name="value_2" string="Product" column_invisible="not parent.placeholder_2"/>
+                                <field name="value_3" string="Value 3" column_invisible="not parent.placeholder_3"/>
+                                <field name="value_4" string="Value 4" column_invisible="not parent.placeholder_4"/>
+                            </tree>
+                        </field>
+
+                        <div class="o_natura_pm_status">
+                            <field name="entry_summary" readonly="1" nolabel="1"/>
+                        </div>
+                    </div>
+                </sheet>
+                <footer>
+                    <button name="action_print_multiples" type="object" string="Build &amp; Print" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_natura_print_multiples_wizard" model="ir.actions.act_window">
+        <field name="name">Print Multiples</field>
+        <field name="res_model">natura.print.multiples.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>
