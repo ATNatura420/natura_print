@@ -37,6 +37,24 @@ class ResUsers(models.Model):
         help="Number of CSV rows to include when using Test Print in the CSV wizard.",
     )
 
+    @property
+    def SELF_READABLE_FIELDS(self):
+        return super().SELF_READABLE_FIELDS + [
+            "natura_print_default_printer_id",
+            "natura_print_template_pref_ids",
+            "natura_print_csv_encoding",
+            "natura_print_csv_test_rows",
+        ]
+
+    @property
+    def SELF_WRITEABLE_FIELDS(self):
+        return super().SELF_WRITEABLE_FIELDS + [
+            "natura_print_default_printer_id",
+            "natura_print_template_pref_ids",
+            "natura_print_csv_encoding",
+            "natura_print_csv_test_rows",
+        ]
+
     def _natura_print_allowed_model_names(self):
         return NATURA_PRINT_ALLOWED_MODELS
 
@@ -47,8 +65,8 @@ class ResUsers(models.Model):
         missing = [model for model in allowed if model not in existing]
         if not missing:
             return
-        model_recs = self.env["ir.model"].search([("model", "in", missing)])
-        self.env["natura.print.user.template.pref"].create(
+        model_recs = self.env["ir.model"].sudo().search([("model", "in", missing)])
+        self.env["natura.print.user.template.pref"].sudo().create(
             [{"user_id": self.id, "model_id": model.id} for model in model_recs]
         )
 
